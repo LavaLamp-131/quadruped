@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import json
 import serial
+#import opencv
 
 class Servo:
     """Represents a servo motor in the GUI."""
@@ -25,16 +26,8 @@ class Leg:
         """Initialize a leg with hip and ankle servos at specific positions."""
         pass
 
-quadPositions = {
-        "hip1" : 0,
-        "hip2" : 0,
-        "hip3" : 0,
-        "hip4" : 0,
-        "ankle1" : 0,
-        "ankle2" : 0,
-        "ankle3" : 0,
-        "ankle4" : 0
-}
+
+quadPositions = [0, 0, 0, 0, 0, 0, 0, 0]
 
 class Quadruped:
     """Represents the entire quadruped robot."""
@@ -63,7 +56,8 @@ class StateManager:
             # Reading from json file
             json_object = json.load(openfile)
             print("Loaded file")
-        for item in json_object:
+        listLength = len(quadPositions)
+        for item in range(listLength):
             quadPositions[item] = json_object[item]
         pass
 
@@ -147,16 +141,16 @@ class QuadrupedGUI:
 
 
         def set_position_values():
-            quadPositions["hip1"] = slider0.get()
-            quadPositions["hip2"] = slider1.get()
-            quadPositions["hip3"] = slider2.get()
-            quadPositions["hip4"] = slider3.get()
-            quadPositions["ankle1"] = slider4.get()
-            quadPositions["ankle2"] = slider5.get()
-            quadPositions["ankle3"] = slider6.get()
-            quadPositions["ankle4"] = slider7.get()
+            quadPositions[0] = slider0.get()
+            quadPositions[1] = slider1.get()
+            quadPositions[2] = slider2.get()
+            quadPositions[3] = slider3.get()
+            quadPositions[4] = slider4.get()
+            quadPositions[5] = slider5.get()
+            quadPositions[6] = slider6.get()
+            quadPositions[7] = slider7.get()
             for item in quadPositions:
-                print(quadPositions[item])
+                print(item)
 
         
         updateButton = tk.Button(text="Update positions", width=25, height=2, 
@@ -166,21 +160,26 @@ class QuadrupedGUI:
                                command= lambda : QuadrupedGUI.save_state(root))
         saveButton.pack()
         loadButton = tk.Button(text="Load saved positions", width=25, height=2,
-                               command= lambda : QuadrupedGUI.load_state(root))
+                               command= lambda : QuadrupedGUI.load_state(root, sliderList))
         loadButton.pack()
+
+        sliderList = [slider0, slider1, slider2, slider3, slider4, slider5, slider6, slider7]
+        return sliderList
 
     def save_state(self):
         StateManager.save_states(root, "quadSaveStates.json")
         pass
 
-    def load_state(self):
+    def load_state(self, sliderList):
         StateManager.load_states(root, "quadSaveStates.json")
+        listLength = len(quadPositions)
+        for value in range(listLength):
+            sliderList[value].set(quadPositions[value])
         pass
 
-    
 
 if __name__ == "__main__":
     root = tk.Tk()
     app = QuadrupedGUI(root)
-    app.create_gui()
+    app.load_state(app.create_gui())
     root.mainloop()
