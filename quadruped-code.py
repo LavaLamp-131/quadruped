@@ -2,145 +2,102 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import json
 import serial
-#import opencv
-
-class Servo:
-    """Represents a servo motor in the GUI."""
-    
-    def __init__(self, parent, servo_id, name, x, y, min_val=0, max_val=180):
-        """Initialize a servo control in the GUI at specific pixel coordinates."""
-        pass
-
-    def get_value(self):
-        """Get the current value of the servo."""
-        pass
-
-    def set_value(self, value):
-        """Set the value of the servo."""
-        pass
-
-class Leg:
-    """Represents a leg of the quadruped, composed of two servos."""
-    
-    def __init__(self, parent, leg_id, base_x, base_y):
-        """Initialize a leg with hip and ankle servos at specific positions."""
-        pass
 
 
 quadPositions = [0, 0, 0, 0, 0, 0, 0, 0]
 
-class Quadruped:
-    """Represents the entire quadruped robot."""
-    
-    def __init__(self, parent):
-        """Initialize the quadruped with four legs."""
-        pass
-
-    def get_all_positions(self):
-        """Get positions of all servos in the quadruped."""
-        pass
-
-    def set_all_positions(self, positions):
-        """Set positions of all servos in the quadruped."""
-        pass
-
 class StateManager:
-    """Manages saving and loading of robot states."""
     
-    def __init__(self):
-        pass
+    stateName = ""
 
-    def load_states(self, filename):
+    def loadStates(self, filename): #Loads positions from file
         # Opening JSON file
-        with open(filename, 'r') as openfile:
-            # Reading from json file
-            json_object = json.load(openfile)
-            print("Loaded file")
-        listLength = len(quadPositions)
-        for item in range(listLength):
-            quadPositions[item] = json_object[item]
-        pass
+        try:
+            with open(filename, 'r') as openfile:
+                # Reading from json file
+                json_object = json.load(openfile)
+                print("Loaded file")
+            listLength = len(quadPositions)
+            for item in range(listLength):
+                quadPositions[item] = json_object[item]
+            pass
+        except:
+            print("Loading error, continuing as normal")
 
-    def save_states(self, filename):
+    def saveStates(self, filename): #Writes current positions list to file
         json_object = json.dumps(quadPositions, indent=8)
         with open(filename, "w") as outfile:
             outfile.write(json_object)
-        pass
-
-    def get_state(self, name):
-        """Get a specific state by name."""
-        pass
-
-    def set_state(self, name, state):
-        """Set a specific state by name."""
-        pass
+        print("Saved all positions to file")
+        
+####################################
+####################################
+####################################
+####################################
 
 class SerialCommunicator:
-    """Handles serial communication with the Pico."""
     
-    def __init__(self, port='/dev/ttyACM0', baud_rate=115200):
-        """Initialize the serial connection."""
-        pass
-
-    def send_command(self, command):
-        """Send a command to the Pico."""
-        pass
-
-    def receive_data(self):
-        """Receive data from the Pico."""
-        pass
-
+    """Handles serial communication with the Pico."""
+        
+    def send_command(self, command, s): #Sends instructions to Pico
+        if command == "numbers":
+            numbers = f"{quadPositions[0]},{quadPositions[1]},{quadPositions[2]},{quadPositions[3]},{quadPositions[4]},{quadPositions[5]},{quadPositions[6]},{quadPositions[7]}\n"
+            s.write(numbers.encode())
+        elif command == "wave":
+            s.write("wave\n".encode())
+    
+####################################
+####################################
+####################################
+####################################
 
 class QuadrupedGUI:
     """Main GUI class for controlling the quadruped robot."""
+    
+    def update_pico(self, command): #Starts serial communication without major error
+        s = serial.Serial("COM8", 115200)
+        SerialCommunicator.send_command(root, command, s)
 
-    def __init__(self, root):
-        pass
-
-    def update_pico(self):
-        """Send updated positions to the Pico."""
-        pass
-
-    def create_gui(self):
+    def create_gui(self): #Creates main GUI
 
         #Hip Servos
-        slider0 = tk.Scale(root, from_=0, to=42, orient=tk.HORIZONTAL)
+        slider0 = tk.Scale(root, from_=0, to=200, orient=tk.HORIZONTAL)
         slider0.pack()
         label0 = tk.Label(text="Hip servo 1")
         label0.pack()
-        slider1 = tk.Scale(root, from_=0, to=42, orient=tk.HORIZONTAL)
+        slider1 = tk.Scale(root, from_=90, to=-50, orient=tk.HORIZONTAL)
         slider1.pack()
         label1 = tk.Label(text="Hip servo 2")
         label1.pack()
-        slider2 = tk.Scale(root, from_=0, to=42, orient=tk.HORIZONTAL)
+        slider2 = tk.Scale(root, from_=0, to=-100, orient=tk.HORIZONTAL)
         slider2.pack()
         label2 = tk.Label(text="Hip servo 3")
         label2.pack()
-        slider3 = tk.Scale(root, from_=0, to=42, orient=tk.HORIZONTAL)
+        slider3 = tk.Scale(root, from_=0, to=270, orient=tk.HORIZONTAL)
         slider3.pack()
         label3 = tk.Label(text="Hip servo 4")
         label3.pack()
 
         #Ankle servos
-        slider4 = tk.Scale(root, from_=0, to=42, orient=tk.HORIZONTAL)
+        slider4 = tk.Scale(root, from_=200, to=0, orient=tk.HORIZONTAL)
         slider4.pack()
         label4 = tk.Label(text="Ankle servo 1")
         label4.pack()
-        slider5 = tk.Scale(root, from_=0, to=42, orient=tk.HORIZONTAL)
+        slider5 = tk.Scale(root, from_=-100, to=270, orient=tk.HORIZONTAL)
         slider5.pack()
         label5 = tk.Label(text="Ankle servo 2")
         label5.pack()
-        slider6 = tk.Scale(root, from_=0, to=42, orient=tk.HORIZONTAL)
+        slider6 = tk.Scale(root, from_=270, to=-100, orient=tk.HORIZONTAL)
         slider6.pack()
         label6 = tk.Label(text="Ankle servo 3")
         label6.pack()
-        slider7 = tk.Scale(root, from_=0, to=42, orient=tk.HORIZONTAL)
+        slider7 = tk.Scale(root, from_=-100, to=275, orient=tk.HORIZONTAL)
         slider7.pack()
         label7 = tk.Label(text="Ankle servo 4")
         label7.pack()
 
 
-        def set_position_values():
+        def set_position_values(): #Updates servo position list
             quadPositions[0] = slider0.get()
             quadPositions[1] = slider1.get()
             quadPositions[2] = slider2.get()
@@ -149,37 +106,46 @@ class QuadrupedGUI:
             quadPositions[5] = slider5.get()
             quadPositions[6] = slider6.get()
             quadPositions[7] = slider7.get()
-            for item in quadPositions:
-                print(item)
+            QuadrupedGUI.update_pico(root, "numbers")
 
         
+        waveButton = tk.Button(text="Make robot wave", width=25, height=2, command= lambda: QuadrupedGUI.update_pico(root, "wave"))
+        waveButton.pack(side=tk.RIGHT)
         updateButton = tk.Button(text="Update positions", width=25, height=2, 
                                  command= lambda : set_position_values())
-        updateButton.pack()
+        updateButton.pack(side=tk.LEFT)
         saveButton = tk.Button(text="Save all positions", width=25, height=2,
-                               command= lambda : QuadrupedGUI.save_state(root))
-        saveButton.pack()
+                               command= lambda : QuadrupedGUI.saveState(root, fileNameEntry.get()))
+        saveButton.pack(side=tk.LEFT)
         loadButton = tk.Button(text="Load saved positions", width=25, height=2,
-                               command= lambda : QuadrupedGUI.load_state(root, sliderList))
-        loadButton.pack()
+                               command= lambda : QuadrupedGUI.loadState(root, sliderList, fileNameEntry.get()))
+        loadButton.pack(side=tk.RIGHT)
+        fileNameEntry = tk.Entry(text="Enter file name", width=25)
+        fileNameEntry.pack(side=tk.RIGHT)
 
         sliderList = [slider0, slider1, slider2, slider3, slider4, slider5, slider6, slider7]
         return sliderList
 
-    def save_state(self):
-        StateManager.save_states(root, "quadSaveStates.json")
+    def saveState(self, filename):
+        StateManager.saveStates(root, filename + ".json")
         pass
 
-    def load_state(self, sliderList):
-        StateManager.load_states(root, "quadSaveStates.json")
+    def loadState(self, sliderList, filename):
+        StateManager.loadStates(root, filename + ".json")
         listLength = len(quadPositions)
         for value in range(listLength):
             sliderList[value].set(quadPositions[value])
         pass
+    
 
+####################################
+####################################
+####################################
+####################################
 
-if __name__ == "__main__":
+if __name__ == "__main__": #Main Program Process
     root = tk.Tk()
-    app = QuadrupedGUI(root)
-    app.load_state(app.create_gui())
+    app = QuadrupedGUI()
+    app.loadState(app.create_gui(), "standing")
+    root.geometry("800x800")
     root.mainloop()
